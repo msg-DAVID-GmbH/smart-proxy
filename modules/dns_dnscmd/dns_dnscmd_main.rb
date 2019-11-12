@@ -46,6 +46,10 @@ module Proxy::Dns::Dnscmd
           std_in, std_out, std_err  = Open3.popen3(command)
           response  = std_out.readlines
           response += std_err.readlines
+		  #Awesome umlauts-fix
+		  for index in 0 ... response.size
+			puts "response[#{index}] = #{response[index].encode!('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: '')}"
+		  end
         end
       rescue Timeout::Error
         raise Proxy::Dns::Error.new("dnscmd did not respond within #{tsecs} seconds")
@@ -59,7 +63,7 @@ module Proxy::Dns::Dnscmd
     end
 
     def report msg, response, error_only
-      if response.grep(/completed successfully/).empty?
+      if response.grep(/wurde erfolgreich ausg/).empty?
         logger.error "Command dnscmd failed:\n" + response.join("\n")
         msg.sub!(/Removed/, "remove")
         msg.sub!(/Added/, "add")
